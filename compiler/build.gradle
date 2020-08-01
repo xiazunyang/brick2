@@ -1,0 +1,16 @@
+import org.gradle.internal.jvm.Jvm
+
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+dependencies {
+    api project(':annotation')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'com.squareup:kotlinpoet:1.6.0'
+    implementation 'com.google.auto:auto-common:0.10'
+    implementation 'com.bennyhuo.aptutils:aptutils:1.6'
+    compileOnly files(Jvm.current().getToolsJar())
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

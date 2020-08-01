@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+dependencies {
+    api project(':annotation')
+    compileOnly fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.6.2'
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
