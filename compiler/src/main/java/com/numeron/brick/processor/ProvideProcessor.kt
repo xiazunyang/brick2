@@ -3,13 +3,14 @@ package com.numeron.brick.processor
 import com.google.auto.common.SuperficialValidation
 import com.numeron.brick.annotation.Provide
 import com.sun.tools.javac.code.Symbol
+import javax.annotation.processing.Filer
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 
-class ProviderProcessor {
+class ProvideProcessor {
 
-    fun process(env: RoundEnvironment) {
+    fun process(env: RoundEnvironment, filer: Filer) {
         env.getElementsAnnotatedWith(Provide::class.java)
                 .filter {
                     SuperficialValidation.validateElement(it)
@@ -24,7 +25,7 @@ class ProviderProcessor {
                             .first(Symbol::isConstructor)
                             .let {
                                 val methodSymbol = it as Symbol.MethodSymbol
-                                ProvideGenerator(classSymbol, methodSymbol).generate()
+                                ProvideGenerator(classSymbol, methodSymbol).generate(filer)
                             }
                 }
     }

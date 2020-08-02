@@ -1,12 +1,12 @@
 package com.numeron.brick.processor
 
-import com.bennyhuo.aptutils.AptContext
 import com.bennyhuo.aptutils.types.asKotlinTypeName
 import com.bennyhuo.aptutils.types.packageName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Type
+import javax.annotation.processing.Filer
 
 class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol: Symbol.MethodSymbol) {
 
@@ -37,19 +37,19 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 }
     }
 
-    fun generate() {
+    fun generate(filer: Filer) {
 
         val packageName = classSymbol.packageName()
 
         val fileName = classSymbol.simpleName.toString() + 's'
 
         FileSpec.builder(packageName, fileName)
-                .addType(generateFactoryClass())        //ViewModelFactory
-                .addType(generateLazyClass())           //LazyViewModel
                 .addFunction(generateLazyFunction())    //kotlin lazy方法
                 .addFunction(generateProvideFunction()) //java provide方法
+                .addType(generateFactoryClass())        //ViewModelFactory
+                .addType(generateLazyClass())           //LazyViewModel
                 .build()
-                .writeTo(AptContext.filer)
+                .writeTo(filer)
     }
 
     private fun generateLazyFunction(): FunSpec {
@@ -78,7 +78,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         val valueGetterFunSpec = FunSpec.getterBuilder()
                 .beginControlFlow("if(_value == null)")
-                .addStatement("_value = provide(owner, ${parameters.joinToString(transform = ParameterSpec::name)})")
+                .addStatement("_value = get(owner, ${parameters.joinToString(transform = ParameterSpec::name)})")
                 .endControlFlow()
                 .addStatement("return _value!!")
                 .build()
@@ -112,6 +112,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 .addProperty(valuePropertySpec)
                 .addFunction(isInitializedFunSpec)
                 .primaryConstructor(constructorFunSpec)
+                .addModifiers(KModifier.PRIVATE)
                 .addProperty(ownerPropertySpec)
                 .addProperties(propertiesSpec)
                 .addSuperinterface(lazyParameterizedTypeName)
@@ -119,7 +120,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
     }
 
     private fun generateProvideFunction(): FunSpec {
-        return FunSpec.builder("provide")
+        return FunSpec.builder("get")
                 .addParameter("owner", VIEW_MODEL_STORE_OWNER_TYPE_NAME)
                 .addParameters(parameters)
                 .addStatement("val factory = ${classSymbol.simpleName}Factory(${parameters.joinToString(transform = ParameterSpec::name)})")
@@ -158,6 +159,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
         return TypeSpec.classBuilder(factoryClassName)
                 .addSuperinterface(VIEW_MODEL_FACTORY_INTERFACE_TYPE_NAME)
                 .addProperties(propertiesSpec)
+                .addModifiers(KModifier.PRIVATE)
                 .primaryConstructor(constructorSpec)
                 .addFunction(createFunSpec)
                 .build()

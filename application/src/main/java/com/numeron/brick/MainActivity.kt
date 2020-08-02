@@ -2,16 +2,19 @@ package com.numeron.brick
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.numeron.brick.contract.lazyWeChatAuthorViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private val userId: String = "Hello world."
 
-//    private val weChatAuthorViewModel by lazyWeChatAuthorViewModel(0, ::userId)
+    private val weChatAuthorViewModel by lazyWeChatAuthorViewModel(0, ::userId)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        weChatAuthorViewModel.userLiveData
     }
 
 }

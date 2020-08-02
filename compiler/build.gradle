@@ -2,6 +2,10 @@ import org.gradle.internal.jvm.Jvm
 
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.gitee.numeron'
+version = '1.0.0'
 
 dependencies {
     api project(':annotation')
