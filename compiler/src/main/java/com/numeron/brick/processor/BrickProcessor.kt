@@ -11,6 +11,7 @@ import javax.lang.model.element.*
 
 class BrickProcessor : AbstractProcessor() {
 
+    private var processFlag = true
     private lateinit var filer: Filer
 
     private val supportedAnnotations = setOf(Provide::class.java)
@@ -22,7 +23,11 @@ class BrickProcessor : AbstractProcessor() {
     }
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        ProvideProcessor().process(roundEnv, filer)
+        if (processFlag) {
+            InjectProcessor().process(roundEnv)
+            ProvideProcessor().process(roundEnv, filer)
+            processFlag = !processFlag
+        }
         return true
     }
 

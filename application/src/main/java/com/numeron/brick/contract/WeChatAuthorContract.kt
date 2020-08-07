@@ -2,20 +2,46 @@ package com.numeron.brick.contract
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.numeron.brick.WeChatAuthorsApi
+import androidx.lifecycle.viewModelScope
+import com.numeron.brick.ApiResponse
+import com.numeron.brick.WeChatAuthor
+import com.numeron.brick.WeChatAuthorDao
+import com.numeron.brick.annotation.Inject
+import com.numeron.brick.annotation.Port
 import com.numeron.brick.annotation.Provide
-import com.numeron.brick.annotation.Repository
+import kotlinx.coroutines.launch
+import retrofit2.http.GET
 
 @Provide
-class WeChatAuthorViewModel(id: Long, provider: () -> String) : ViewModel() {
+class WeChatAuthorViewModel : ViewModel() {
 
-    val userLiveData = MutableLiveData<String>()
+    @Inject
+    private lateinit var weChatAuthorRepository: WeChatAuthorRepository
 
-    init {
-        userLiveData.postValue(provider())
+    val weChatAuthorLiveData = MutableLiveData<List<WeChatAuthor>>()
+
+    fun getWeChatAuthorList() {
+        viewModelScope.launch {
+            val weChatAuthorList = weChatAuthorRepository.weChatAuthorsApi.getWeChatAuthorList()
+            weChatAuthorLiveData.postValue(weChatAuthorList.data)
+        }
     }
 
 }
 
-@Repository
-class WeChatAuthorRepository(val weChatAuthorApi: WeChatAuthorsApi)
+class WeChatAuthorRepository {
+
+    @Inject
+    lateinit var weChatAuthorsApi: WeChatAuthorsApi
+
+    @Inject
+    lateinit var weChatAuthorDao: WeChatAuthorDao
+
+}
+
+interface WeChatAuthorsApi {
+
+    @GET("wxarticle/chapters/json")
+    suspend fun getWeChatAuthorList(): ApiResponse<List<WeChatAuthor>>
+
+}

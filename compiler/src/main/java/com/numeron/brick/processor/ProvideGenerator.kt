@@ -58,11 +58,15 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         val lazyParameterizedTypeName = LAZY_INTERFACE_TYPE_NAME.parameterizedBy(ktClassName)
 
+        val parameters = parameters.joinToString(transform = ParameterSpec::name).let {
+            if(it.isEmpty()) it else ", $it"
+        }
+
         return FunSpec.builder("lazy$className")
                 .receiver(VIEW_MODEL_STORE_OWNER_TYPE_NAME)
-                .addParameters(parameters)
+                .addParameters(this.parameters)
                 .returns(lazyParameterizedTypeName)
-                .addStatement("return Lazy$className(this, ${parameters.joinToString(transform = ParameterSpec::name)})")
+                .addStatement("return Lazy$className(this$parameters)")
                 .build()
     }
 
@@ -76,9 +80,13 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 .addParameters(parameters)
                 .build()
 
+        val parameters = parameters.joinToString(transform = ParameterSpec::name).let {
+            if(it.isEmpty()) it else ", $it"
+        }
+
         val valueGetterFunSpec = FunSpec.getterBuilder()
                 .beginControlFlow("if(_value == null)")
-                .addStatement("_value = get(owner, ${parameters.joinToString(transform = ParameterSpec::name)})")
+                .addStatement("_value = get(owner${parameters})")
                 .endControlFlow()
                 .addStatement("return _value!!")
                 .build()

@@ -1,18 +1,16 @@
 package com.numeron.brick.plugin
 
 import com.android.build.api.transform.*
-import javassist.ClassPool
 import org.apache.commons.io.FileUtils
+import java.io.File
 
 abstract class BaseTransform : Transform() {
-
-    protected val classPool = ClassPool.getDefault()
 
     override fun getInputTypes(): MutableSet<QualifiedContent.ContentType> {
         return mutableSetOf(QualifiedContent.DefaultContentType.CLASSES)
     }
 
-    override fun isIncremental(): Boolean = false
+    override fun isIncremental(): Boolean = true
 
     override fun getScopes(): MutableSet<in QualifiedContent.Scope> {
         return mutableSetOf(QualifiedContent.Scope.PROJECT)
@@ -23,28 +21,24 @@ abstract class BaseTransform : Transform() {
         val outputProvider = transformInvocation.outputProvider
 
         transformInvocation.inputs.forEach { transformInput ->
-            //处理第三方jar
-            transformInput.jarInputs.forEach { jarInput ->
-                //添加到池中
-                classPool.appendClassPath(jarInput.file.absolutePath)
 
-                //处理jar
-                processJar(jarInput, transformInvocation)
+            transformInput.jarInputs.forEach { jarInput ->
                 //复制到输入目录
-                val destination = outputProvider.getContentLocation(jarInput.file.absolutePath,
+                val destinationDirectory = outputProvider.getContentLocation(jarInput.file.absolutePath,
                         jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                FileUtils.copyFile(jarInput.file, destination)
+                FileUtils.copyFile(jarInput.file, destinationDirectory)
+                //处理jar
+                processJar(destinationDirectory)
             }
+
             //处理本地class
             transformInput.directoryInputs.forEach { directoryInput ->
-                //添加到池中
-                classPool.appendClassPath(directoryInput.file.absolutePath)
-                //处理文件夹
-                processDirectory(directoryInput, transformInvocation)
                 //复制到输入目录
-                val destination = outputProvider.getContentLocation(directoryInput.name,
+                val destinationDirectory = outputProvider.getContentLocation(directoryInput.name,
                         directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
-                FileUtils.copyDirectory(directoryInput.file, destination)
+                FileUtils.copyDirectory(directoryInput.file, destinationDirectory)
+                //处理文件
+                processDirectory(destinationDirectory)
             }
 
         }
@@ -56,11 +50,11 @@ abstract class BaseTransform : Transform() {
 
     }
 
-    protected open fun processJar(jarInput: JarInput, transformInvocation: TransformInvocation) {
+    protected open fun processJar(classPath: File) {
 
     }
 
-    protected open fun processDirectory(directoryInput: DirectoryInput, transformInvocation: TransformInvocation) {
+    protected open fun processDirectory(classPath: File) {
 
     }
 
