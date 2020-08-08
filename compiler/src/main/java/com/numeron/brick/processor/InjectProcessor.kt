@@ -1,7 +1,6 @@
 package com.numeron.brick.processor
 
 import com.bennyhuo.aptutils.types.asElement
-import com.bennyhuo.aptutils.types.isSubTypeOf
 import com.bennyhuo.aptutils.types.simpleName
 import com.numeron.brick.annotation.RoomInstance as ARoom
 import com.numeron.brick.core.*

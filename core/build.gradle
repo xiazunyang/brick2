@@ -1,6 +1,5 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
-//apply plugin: 'maven'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.gitee.numeron'
@@ -8,24 +7,9 @@ version = brick_version
 
 dependencies {
     api project(':annotation')
-    compileOnly 'com.squareup.retrofit2:retrofit:2.6.2'
-    compileOnly fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.6'
 }
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
-
-/*group = 'com.gitee.numeron.brick'
-version = brick_version
-
-uploadArchives {
-    repositories.mavenDeployer {
-        //本地仓库路径，以放到项目根目录下的 maven 的文件夹为例
-        repository(url: uri('../maven'))
-        pom.groupId = 'com.gitee.numeron.brick'
-        pom.artifactId = 'core'
-        pom.version = brick_version
-    }
-}*/

@@ -3,7 +3,7 @@ package com.numeron.brick.plugin
 import retrofit2.Retrofit
 
 @Suppress("unused")
-class RetrofitHelper {
+class RetrofitTemplate {
 
     private fun newRetrofit(retrofit: Retrofit, port: Int, url: String?): Retrofit {
         if (port > 0) {

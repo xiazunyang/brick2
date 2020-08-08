@@ -2,5 +2,4 @@ include ':plugin'
 include ':core'
 include ':compiler'
 include ':annotation'
-include ':application'
 rootProject.name = "Brick"
