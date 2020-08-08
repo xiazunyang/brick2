@@ -24,7 +24,7 @@ object Brick {
 
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
-    fun writeInject(injectList: List<Inject>) {
+    fun setInject(injectList: List<Inject>) {
         injectOutputFile.writeText(gson.toJson(injectList))
     }
 

@@ -8,15 +8,14 @@ import com.numeron.brick.core.InjectKind
 import javassist.*
 import javassist.bytecode.AccessFlag
 import org.gradle.api.Project
-import org.gradle.api.logging.LogLevel
 import java.io.File
 
-class BrickTransition(private val project: Project) : BaseTransform() {
+class BrickTransform(project: Project) : BaseTransform(project) {
 
     private val classPool = ClassPool.getDefault()
 
     //获取待注入的元素列表
-    private val injectList = Brick.getInjectList().groupBy(Inject::owner).toMutableMap()
+    private val injectMap = Brick.getInjectList().groupBy(Inject::owner).toMutableMap()
 
     private val retrofitInstance by lazy(Brick::getRetrofitInstance)
 
@@ -36,24 +35,36 @@ class BrickTransition(private val project: Project) : BaseTransform() {
     override fun processDirectory(classPath: File) {
         classPool.appendClassPath(classPath.absolutePath)
 
-        injectList.mapNotNull { (owner, inject) ->
-            classPool.getOrNull(owner)?.let { ctClass ->
-                ctClass to inject
+        classPath.forEachDeep {
+            //获取此class的相对路径
+            val classFilePath = it.absolutePath
+                    .substringBeforeLast('.')
+                    .removePrefix(classPath.absolutePath + File.separatorChar)
+                    .replace(File.separatorChar, '.')
+            //从缓存列表中找到对应的注入项
+            val injectList = injectMap.remove(classFilePath)
+            if (injectList != null) {
+                //获取CtClass
+                var injectClass = classPool.get(classFilePath)
+                //解冻
+                if (injectClass.isFrozen) {
+                    injectClass.defrost()
+                }
+                //注入
+                injectList.forEach { inject ->
+                    injectClass = dispatchInject(injectClass, inject)
+                }
+                //写入到文件中
+                injectClass.writeFile(classPath.absolutePath)
             }
-        }.forEach { (ctClass, injectList)->
-            var injectClass = ctClass
-            injectList.forEach { inject ->
-                injectClass = dispatchInject(injectClass, inject)
+            //将待注入列表置空
+            if (this.injectMap.isEmpty()) {
+                Brick.setInject(emptyList())
             }
-            injectClass.writeFile(classPath.absolutePath)
-            this.injectList.remove(ctClass.name)
         }
     }
 
     private fun dispatchInject(ctClass: CtClass, inject: Inject): CtClass {
-        if (ctClass.isFrozen) {
-            ctClass.defrost()
-        }
         return when (inject.kind) {
             InjectKind.Room -> injectDao(ctClass, inject)
             InjectKind.Retrofit -> injectApi(ctClass, inject)

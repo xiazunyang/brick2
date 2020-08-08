@@ -23,7 +23,7 @@ class InjectProcessor {
         roomProcess(env)
 
         //获取所有被Inject注解标记的类，并输入到inject.json中
-        Brick.writeInject(env.getElementsAnnotatedWith(AInject::class.java).map(::inject))
+        Brick.setInject(env.getElementsAnnotatedWith(AInject::class.java).map(::inject))
 
     }
 
