@@ -4,7 +4,7 @@
 辅助android开发者搭建基于JetPack组件构建MVVM框架的注解处理框架。通过注解自动生成ViewModel的Factory类、lazy方法等；支持在项目的任意位置注入ROOM的dao层接口与Retrofit库中的api接口。
 
 #### 特点
-android开发者可以将brick理解为一个轻量级的注入框架，brick主要在编译期工作， **不会产生任何额外的性能消耗** ，并且**只有1个注解库会打包到你的android工程中，不用担心体积问题**。
+`android开发者`可以将`brick`理解为一个轻量级的注入框架，使用非常简单，使用2个注解即可工作。`brick`主要在编译期工作， **不会在`App`运行时产生任何额外的性能消耗** ，并且只有1个注解库会打包到你的`android`工程中，**不用担心体积增大**的问题。
 
 #### 适用范围
 1. 使用`androidx`而非support库。
@@ -60,8 +60,8 @@ class WxAuthorViewModel: ViewModel() {
 }
 ```
  2. 有3种方式让brick注解处理器开始工作：
-* 在Termial终端上输入`greadlew :[ModuleName]:kaptDebugKotlin`脚本
-* 在AndroidStudio右侧Gradle扩展栏中依次找到`[PrjectName] -> [ModuneName] -> Tasks -> other -> kaptDebugKotlin`并双击运行
+* 在Termial终端上输入`greadlew :[ModuleName]:kaptDebugKotlin`运行脚本；
+* 在AndroidStudio右侧Gradle扩展栏中依次找到`[PrjectName] -> [ModuneName] -> Tasks -> other -> kaptDebugKotlin`并双击运行脚本；
 * `Ctrl + F9`编译整个项目。  
  **以上三种方式任选其一即可运行brick注解处理器。** 
  3.  脚本运行结束后，会生成两个个包级方法：
