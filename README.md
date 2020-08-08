@@ -6,6 +6,12 @@
 #### 特点
 android开发者可以将brick理解为一个轻量级的注入框架，brick主要在编译期工作， **不会产生任何额外的性能消耗** ，并且**只有1个注解库会打包到你的android工程中，不用担心体积问题**。
 
+#### 适用范围
+1. 使用`androidx`而非support库。
+2. 使用`JetPack`的ViewModel组件。
+3. 使用Retrofit作为网络请求库。
+4. 使用ROOM数据库框架。（可选）
+
 #### 引入
 
 1.  在你的android工程的根目录下的build.gradle文件中的适当的位置添加以下代码：
@@ -66,7 +72,7 @@ class WxAuthorViewModel: ViewModel() {
 
 二、 @Inject注解的使用方法  
   
--2. 在获取`Retrofit`实例的方法上添加`@RetrofitInstance`，如：
+-2.  **(必需)** 在获取`Retrofit`实例的方法上添加`@RetrofitInstance`，如：
 ```
 @RetrofitInstance
 val retrofit: Retrofit by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -89,8 +95,8 @@ val okHttpClient: OkHttpClient by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         .build()
 }
 ```  
- **注：`@RetrofitInstance`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`、`companion object`中或是包级属性/方法**   
--1. 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
+ **注：`@RetrofitInstance`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`、`companion object`中或是包级属性/方法。**   
+-1.  **(可选)** 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
 ```
 @RoomInstance
 val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
