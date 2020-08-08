@@ -10,7 +10,7 @@
 1. 使用`androidx`而非support库。
 2. 使用`JetPack`的ViewModel组件。
 3. 使用Retrofit作为网络请求库。
-4. 服务端为多端口、多IP的项目。
+4. 服务端为多端口、多IP的项目。(可选)
 5. 使用ROOM数据库框架。（可选）
 
 #### 引入
