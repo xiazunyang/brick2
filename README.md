@@ -10,8 +10,8 @@
 1. 使用`androidx`而非support库。
 2. 使用`JetPack`的ViewModel组件。
 3. 使用Retrofit作为网络请求库。
-4. 服务端为多端口、多IP的项目。(可选)
-5. 使用ROOM数据库框架。（可选）
+4. 使用ROOM数据库框架。（可选）
+5. 服务端为多端口、多IP的项目。(可选)
 
 #### 引入
 
@@ -53,7 +53,7 @@ dependencies {
 #### 使用
 
 一、 @Provide注解的使用方法：
- 1. 这里是列表文本在你编写好的ViewModel子类上使用@Provide注解
+ 1. 在你编写好的ViewModel子类上添加@Provide注解
 ```
 @Provide
 class WxAuthorViewModel: ViewModel() {
@@ -65,7 +65,7 @@ class WxAuthorViewModel: ViewModel() {
 * 在AndroidStudio右侧Gradle扩展栏中依次找到`[PrjectName] -> [ModuneName] -> Tasks -> other -> kaptDebugKotlin`并双击运行脚本；
 * `Ctrl + F9`编译整个项目。  
  **以上三种方式任选其一即可运行brick注解处理器。** 
- 3.  脚本运行结束后，会生成两个个包级方法：
+ 3.  脚本运行结束后，会生成两个包级方法：
 * `lazyWxAuthorViewModel()`扩展方法，在Activity或Fragment中直接调用即可。
 * `get()`方法，在不方便使用lazy方法时，可使用此方法获取ViewModel的实例。  
  **注：`lazyWxAuthorViewModel`方法就是对`get()`方法的包装。**   
@@ -96,7 +96,7 @@ val okHttpClient: OkHttpClient by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         .build()
 }
 ```  
- **注：`@RetrofitInstance`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`、`companion object`中或是包级属性/方法。**   
+ **注：`@RetrofitInstance`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**   
 -1.  **(可选)** 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
 ```
 @RoomInstance
@@ -105,7 +105,7 @@ val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED
         .build()
 }
 ```
- **注：`@RoomDatabase`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`、`companion object`中或是包级属性/方法** 
+ **注：`@RoomDatabase`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**    
 0. 假设已有`Retrofit Api`接口和`WxAuthorRepo`类
 ```
 interface WxAuthorApi {
@@ -135,5 +135,5 @@ class WxAuthorViewModel: ViewModel() {
     private lateinit var wxAuthorRepo: WxAuthorRepo
 }
 ```
-标记后，直接使用即可，所有被`@Inject`标记的字段，都会在编译期自动查找对应的类型并获取/创建实例，无需担心它们在何时被赋值。   
- **注：虽然是`lateinit var`修饰的字段，但是请不要尝试为任何被`@Inject`标记的字段赋值，这会导致致使的错误。** 
+标记后，继续编写业务代码即可，所有被`@Inject`标记的字段，都会在编译期自动查找对应的类型并获取/创建实例，无需担心它们在何时被赋值。   
+ **注：虽然是`lateinit var`修饰的字段，但是不要尝试为任何被`@Inject`标记的字段赋值，这会导致致命的错误。** 
