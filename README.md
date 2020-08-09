@@ -52,7 +52,7 @@ dependencies {
 ```
 #### 使用
 
-一、 @Provide注解的使用方法：
+ **一、 @Provide注解的使用方法：** 
  1. 在你编写好的ViewModel子类上添加@Provide注解
 ```
 @Provide
@@ -71,7 +71,7 @@ class WxAuthorViewModel: ViewModel() {
  **注：`lazyWxAuthorViewModel`方法就是对`get()`方法的包装。**   
 直接使用生成的方法，即可创建对应的ViewModel实例。
 
-二、 @Inject注解的使用方法  
+ **二、 @Inject注解的使用方法**   
   
 -2.  **(必需)** 在获取`Retrofit`实例的方法上添加`@RetrofitInstance`，如：
 ```
@@ -118,7 +118,7 @@ class WxAuthorRepo {
 }
 
 ```
-1. 在WxAuthorRepo中添加一个lateinit var字段，并用`@Inject`标记：
+1. 在WxAuthorRepo中添加`lateinit var WxAuthorApi`字段，并用`@Inject`标记：
 ```
 class WxAuthorRepo {
 
@@ -135,5 +135,32 @@ class WxAuthorViewModel: ViewModel() {
     private lateinit var wxAuthorRepo: WxAuthorRepo
 }
 ```
-标记后，继续编写业务代码即可，所有被`@Inject`标记的字段，都会在编译期自动查找对应的类型并获取/创建实例，无需担心它们在何时被赋值。   
- **注：虽然是`lateinit var`修饰的字段，但是不要尝试为任何被`@Inject`标记的字段赋值，这会导致致命的错误。** 
+标记后，继续编写业务代码即可，所有被`@Inject`标记的字段，都会在编译期自动获取或创建实例，无需担心它们在何时被赋值。   
+ **注：虽然是`lateinit var`修饰的字段，但是不要为任何被`@Inject`标记的字段赋值，这会导致致命的错误。**   
+ **注：`@Inject`可以处理的类型只有`Retrofit`的`api`接口和`ROOM`的`dao`接口、以及有1个无参构造的类。**   
+
+ **三、 多服务器或多端口的处理方法：** 
+假设有另一个Retrofit api接口，它的访问地址或端口与baseUrl中的不一样，此时，可通过`@Port`和`@Url`注解来设置它们的url或port：
+  
+1. `@Port`的使用：
+```
+@Port(1080)
+interface ArticleApi {
+
+    @GET("wxarticle/list/{chapterId}/{page}/json")
+    suspend fun getArticleList(@Path("chapterId") chapterId: Int, @Path("page") page: Int): Paged<Article>
+
+}
+```
+添加此注解后，brick会在编译期根据`@RetrofitInstance`注解标记的`Retrofit`实例和`@Port`的端口号，重新创建一个`Retrofit`实例，并使用新的`Retrofit`实例创建`ArticleApi`的实例。  
+2. `@Url`的使用：
+```
+@Url("http://www.wanandroid.com:1080/")
+interface ArticleApi {
+
+    @GET("wxarticle/list/{chapterId}/{page}/json")
+    suspend fun getArticleList(@Path("chapterId") chapterId: Int, @Path("page") page: Int): Paged<Article>
+
+}
+```
+与`@Port`的使用基本一致，实现的原理也是一样的。
