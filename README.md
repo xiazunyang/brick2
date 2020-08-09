@@ -68,8 +68,19 @@ class WxAuthorViewModel: ViewModel() {
  3.  脚本运行结束后，会生成两个包级方法：
 * `lazyWxAuthorViewModel()`扩展方法，在Activity或Fragment中直接调用即可。
 * `get()`方法，在不方便使用lazy方法时，可使用此方法获取ViewModel的实例。  
- **注：`lazyWxAuthorViewModel`方法就是对`get()`方法的包装。**   
-直接使用生成的方法，即可创建对应的ViewModel实例。
+ **注：`lazyWxAuthorViewModel`方法就是对`get()`方法的包装。**     
+直接使用生成的方法，即可创建对应的ViewModel实例：
+```
+private val wxAuthorViewModel by lazyWxAuthorViewModel()
+```
+或在onCreate()之后，通过get创建：
+```
+private lateinit var wxAuthorViewModel: WxAuthorViewModel
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    wxAuthorViewModel = get(this)
+}
+```
 
  **二、 @Inject注解的使用方法**   
   
