@@ -139,8 +139,8 @@ class WxAuthorViewModel: ViewModel() {
  **注：虽然是`lateinit var`修饰的字段，但是不要为任何被`@Inject`标记的字段赋值，这会导致致命的错误。**   
  **注：`@Inject`可以处理的类型只有`Retrofit`的`api`接口和`ROOM`的`dao`接口、以及有1个无参构造的类。**   
 
- **三、 多服务器或多端口的处理方法：** 
-假设有另一个Retrofit api接口，它的访问地址或端口与baseUrl中的不一样，此时，可通过`@Port`和`@Url`注解来设置它们的url或port：
+ **三、 多服务器或多端口的处理方法：**   
+假设有另一个Retrofit api接口，它的访问地址或端口与baseUrl中的不一样，此时，可通过`@Port`和`@Url`注解来设置它们的url或port。  
   
 1. `@Port`的使用：
 ```
