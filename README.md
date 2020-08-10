@@ -73,7 +73,7 @@ class WxAuthorViewModel: ViewModel() {
 ```
 private val wxAuthorViewModel by lazyWxAuthorViewModel()
 ```
-或在onCreate()之后，通过get创建：
+ 或在onCreate()之后，通过get创建：
 ```
 private lateinit var wxAuthorViewModel: WxAuthorViewModel
 
@@ -85,7 +85,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 #### **二、 @Inject注解的使用方法**   
   
--2.  **(必需)** 在获取`Retrofit`实例的方法上添加`@RetrofitInstance`，如：
+ -2. **(必需)** 在获取`Retrofit`实例的方法上添加`@RetrofitInstance`，如：
 ```
 @RetrofitInstance
 val retrofit: Retrofit by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -110,7 +110,7 @@ val okHttpClient: OkHttpClient by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
 ```  
  **注：`@RetrofitInstance`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**   
    
--1.  **(可选)** 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
+ -1. **(可选)** 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
 ```
 @RoomInstance
 val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -120,7 +120,7 @@ val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED
 ```
  **注：`@RoomDatabase`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**  
    
-0. 假设已有`Retrofit Api`接口和`WxAuthorRepo`类
+ 0. 假设已有`Retrofit Api`接口和`WxAuthorRepo`类
 ```
 interface WxAuthorApi {
     @GET("wxarticle/chapters/json  ")
@@ -133,7 +133,7 @@ class WxAuthorRepo {
 
 ```
   
-1. 在WxAuthorRepo中添加`lateinit var`修饰的`WxAuthorApi`字段，并用`@Inject`标记：
+ 1. 在WxAuthorRepo中添加`lateinit var`修饰的`WxAuthorApi`字段，并用`@Inject`标记：
 ```
 class WxAuthorRepo {
 
@@ -143,7 +143,7 @@ class WxAuthorRepo {
 }
 ```
   
-2. 在ViewModel中创建`lateinit var`修饰的`WxAuthorRepo`字段，并用`@Inject`标记：
+ 2. 在ViewModel中创建`lateinit var`修饰的`WxAuthorRepo`字段，并用`@Inject`标记：
 ```
 @Provide
 class WxAuthorViewModel: ViewModel() {
@@ -158,7 +158,7 @@ class WxAuthorViewModel: ViewModel() {
 #### **三、 多服务器或多端口的处理方法：**   
 假设有另一个Retrofit api接口，它的访问地址或端口与`baseUrl`中的不一样，此时，可以在`Retrofit`的`api`接口上添加`@Port`和`@Url`注解来设置它们的url或port。  
   
-1. `@Port`的使用：
+ 1. `@Port`的使用：
 ```
 @Port(1080)
 interface ArticleApi {
@@ -170,7 +170,7 @@ interface ArticleApi {
 ```
 添加此注解后，brick会在编译期根据`@RetrofitInstance`注解标记的`Retrofit`实例和`@Port`的端口号，重新创建一个`Retrofit`实例，并使用新的`Retrofit`实例创建`ArticleApi`的实例。  
     
-2. `@Url`的使用：
+ 2. `@Url`的使用：
 ```
 @Url("http://www.wanandroid.com:1080/")
 interface ArticleApi {
