@@ -78,6 +78,7 @@ private val wxAuthorViewModel by lazyWxAuthorViewModel()
 private lateinit var wxAuthorViewModel: WxAuthorViewModel
 
 override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
     wxAuthorViewModel = get(this)
 }
 ```
@@ -107,7 +108,8 @@ val okHttpClient: OkHttpClient by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         .build()
 }
 ```  
- **注：`@RetrofitInstance`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**   
+ **注：`@RetrofitInstance`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**   
+   
 -1.  **(可选)** 在获取`RoomDatabase`实例的属性或方法上标记`@RoomInstance`，如：
 ```
 @RoomInstance
@@ -116,7 +118,8 @@ val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED
         .build()
 }
 ```
- **注：`@RoomDatabase`注解只能标记在public修饰的val属性上或方法上，val属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**    
+ **注：`@RoomDatabase`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**  
+   
 0. 假设已有`Retrofit Api`接口和`WxAuthorRepo`类
 ```
 interface WxAuthorApi {
@@ -129,6 +132,7 @@ class WxAuthorRepo {
 }
 
 ```
+  
 1. 在WxAuthorRepo中添加`lateinit var`修饰的`WxAuthorApi`字段，并用`@Inject`标记：
 ```
 class WxAuthorRepo {
@@ -138,6 +142,7 @@ class WxAuthorRepo {
 
 }
 ```
+  
 2. 在ViewModel中创建`lateinit var`修饰的`WxAuthorRepo`字段，并用`@Inject`标记：
 ```
 @Provide
@@ -164,6 +169,7 @@ interface ArticleApi {
 }
 ```
 添加此注解后，brick会在编译期根据`@RetrofitInstance`注解标记的`Retrofit`实例和`@Port`的端口号，重新创建一个`Retrofit`实例，并使用新的`Retrofit`实例创建`ArticleApi`的实例。  
+    
 2. `@Url`的使用：
 ```
 @Url("http://www.wanandroid.com:1080/")
