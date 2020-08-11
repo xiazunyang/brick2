@@ -118,7 +118,7 @@ val wandroidDatabase: WandroidDatabase by lazy(LazyThreadSafetyMode.SYNCHRONIZED
         .build()
 }
 ```
- **注：`@RoomDatabase`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**  
+ **注：`@RoomInstance`注解只能标记在`public`修饰的`val`属性上或方法上，`val`属性上或方法可以在`object 单例`或`companion object`中，也可以是包级属性/方法。**  
    
  0. 假设已有`Retrofit Api`接口和`WxAuthorRepo`类
 ```
