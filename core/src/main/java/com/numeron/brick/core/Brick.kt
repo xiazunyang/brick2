@@ -88,7 +88,7 @@ object Brick {
     }
 
     fun clearProjectCache(projectName: String) {
-        File(TEMP_PATH, projectName).delete()
+        File(TEMP_PATH, projectName).deleteRecursively()
     }
 
     /**
