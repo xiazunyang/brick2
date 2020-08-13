@@ -22,7 +22,7 @@
 buildscript {
     ...
     ext {
-        brick_version = '0.3.0'
+        brick_version = '0.3.1'
     }
     repositories {
         ...
