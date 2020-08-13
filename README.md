@@ -1,5 +1,7 @@
 # Brick
 
+[![](https://jitpack.io/v/com.gitee.numeron/brick.svg)](https://jitpack.io/#com.gitee.numeron/brick)
+
 ### 介绍
 辅助android开发者搭建基于JetPack组件构建MVVM框架的注解处理框架。通过注解自动生成ViewModel的Factory类、lazy方法等；支持在项目的任意位置注入ROOM的dao层接口与Retrofit库中的api接口。
 
@@ -20,7 +22,7 @@
 buildscript {
     ...
     ext {
-        brick_version = '0.2.0'
+        brick_version = '0.3.0'
     }
     repositories {
         ...
@@ -38,14 +40,51 @@ allprojects {
     }
 }
 ```
-2.  在你的android工程中要启用brick的android模块的build.gradle文件中的适当位置添加以下代码：
+2.  在你的android工程的主模块中的build.gradle文件中的适当位置添加以下代码：
 ```
 ...
 apply plugin: 'kotlin-kapt'
 apply plugin: 'brick'
 ...
+android {
+    ...
+    defaultConfig {
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments(['MODULE_NAME': project.name, 'PROJECT_NAME': project.rootProject.name])
+            }
+        }
+    }
+    ...
+}
+...
 dependencies {
     ...
+    implementation "com.gitee.numeron.brick:annotation:$brick_version"
+    kapt "com.gitee.numeron.brick:compiler:$brick_version"
+}
+```
+
+3. 在android工程中的非主模块的build.gradle文件的适当位置添加以下代码：
+```
+...
+apply plugin: 'kotlin-kapt'
+...
+android {
+    ...
+    defaultConfig {
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments(['MODULE_NAME': project.name, 'PROJECT_NAME': project.rootProject.name])
+            }
+        }
+    }
+    ...
+}
+...
+dependencies {
     implementation "com.gitee.numeron.brick:annotation:$brick_version"
     kapt "com.gitee.numeron.brick:compiler:$brick_version"
 }
