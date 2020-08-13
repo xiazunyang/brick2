@@ -66,7 +66,7 @@ dependencies {
 }
 ```
 
-3. 在android工程中的非主模块的build.gradle文件的适当位置添加以下代码：
+3. 在android工程的子模块中的build.gradle文件的适当位置添加以下代码：
 ```
 ...
 apply plugin: 'kotlin-kapt'
