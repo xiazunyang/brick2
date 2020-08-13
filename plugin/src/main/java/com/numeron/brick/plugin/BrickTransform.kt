@@ -74,7 +74,7 @@ class BrickTransform(project: Project) : BaseTransform(project) {
             zip(classPath, jarFile)
         }
         //处理完成后，清理缓存文件
-        Brick.clearProjectCache(projectName)
+        //Brick.clearProjectCache(projectName)
     }
 
     private fun scanInjectModule(classPath: File) {
@@ -97,12 +97,13 @@ class BrickTransform(project: Project) : BaseTransform(project) {
             //获取CtClass
             var injectClass = classPool.get(classFilePath)
             //解冻
-            if (injectClass.isFrozen) {
-                injectClass.defrost()
-            }
-            //注入
-            injectList.forEach { inject ->
-                injectClass = dispatchInject(injectClass, inject)
+            val frozen = injectClass.isFrozen
+            //frozen为false时，则开始注入，否则直接写到文件中
+            if (!frozen) {
+                //注入
+                injectList.forEach { inject ->
+                    injectClass = dispatchInject(injectClass, inject)
+                }
             }
             iLog("injected: ${injectClass.name}")
             //写入到文件中
@@ -120,6 +121,7 @@ class BrickTransform(project: Project) : BaseTransform(project) {
 
     private fun injectApi(ctClass: CtClass, inject: Inject): CtClass {
         val injectField = ctClass.getDeclaredField(inject.variableName)
+
         //移除已存在的、未初始化的字段
         ctClass.removeField(injectField)
 
@@ -134,7 +136,7 @@ class BrickTransform(project: Project) : BaseTransform(project) {
 
         val variableType = inject.variableType
         val (url, port) = getUrlAndPort(inject)
-        if (!url.isNullOrEmpty() || port > 0) {
+        if ((!url.isNullOrEmpty() || port > 0) && !hasNewRetrofitMethod(ctClass)) {
             ctClass.addMethod(CtMethod(newRetrofitMethod, ctClass, null))
             ctClass.addField(injectField, "newRetrofit($retrofitGetter, $port, $url).create(${variableType}.class);")
         } else {
@@ -210,6 +212,15 @@ class BrickTransform(project: Project) : BaseTransform(project) {
     private fun import(classPath: String) {
         if (!classPool.importedPackages.asSequence().contains(classPath)) {
             classPool.importPackage(classPath)
+        }
+    }
+
+    private fun hasNewRetrofitMethod(ctClass: CtClass): Boolean {
+        return try {
+            ctClass.getDeclaredMethod("newRetrofit", newRetrofitMethod.parameterTypes)
+            true
+        } catch (throwable: Throwable) {
+            false
         }
     }
 
