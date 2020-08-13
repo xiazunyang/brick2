@@ -13,7 +13,7 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 
-class InjectProcessor {
+class InjectProcessor(private val projectName: String, private val moduleName: String) {
 
     fun process(env: RoundEnvironment) {
         //处理RetrofitInstance注解
@@ -23,20 +23,12 @@ class InjectProcessor {
         roomProcess(env)
 
         //获取所有被Inject注解标记的类，并输入到inject.json中
-        Brick.setInject(env.getElementsAnnotatedWith(AInject::class.java).map(::inject))
+        Brick.addInject(projectName, moduleName, env.getElementsAnnotatedWith(AInject::class.java).map(::inject))
 
     }
 
     private fun retrofitProcess(env: RoundEnvironment) {
         val annotatedElements = env.getElementsAnnotatedWith(ARetrofit::class.java)
-
-        if (annotatedElements.size == 0) {
-            throw IllegalStateException("Annotation @RetrofitInstance not found.")
-        }
-
-        if (annotatedElements.size > 1) {
-            throw IllegalStateException("Annotation @RetrofitInstance only use 1 times!")
-        }
 
         val element = annotatedElements.firstOrNull() ?: return
 
@@ -53,7 +45,7 @@ class InjectProcessor {
         val owner = ownerClassSymbol.toString()
         val kind = getKind(ownerClassSymbol)
 
-        Brick.setRetrofitInstance(RetrofitInstance(name, owner, kind))
+        Brick.setRetrofitInstance(projectName, RetrofitInstance(name, owner, kind))
     }
 
     private fun inject(element: Element): Inject {
@@ -154,7 +146,9 @@ class InjectProcessor {
             val owner = ownerClassSymbol.toString()
             val daoMethods = getMethods(methodSymbol.returnType.asElement())
             RoomInstance(name, owner, kind, daoMethods)
-        }.let(Brick::setRoomInstance)
+        }.let {
+            Brick.addRoomInstance(projectName, moduleName, it)
+        }
     }
 
     private fun isSubTypeOfRoomDatabase(typeSymbol: Symbol.TypeSymbol): Boolean {

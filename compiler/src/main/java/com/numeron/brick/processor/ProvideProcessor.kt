@@ -1,5 +1,6 @@
 package com.numeron.brick.processor
 
+import com.bennyhuo.aptutils.AptContext
 import com.google.auto.common.SuperficialValidation
 import com.numeron.brick.annotation.Provide
 import com.sun.tools.javac.code.Symbol
@@ -10,7 +11,7 @@ import javax.lang.model.element.TypeElement
 
 class ProvideProcessor {
 
-    fun process(env: RoundEnvironment, filer: Filer) {
+    fun process(env: RoundEnvironment) {
         env.getElementsAnnotatedWith(Provide::class.java)
                 .filter {
                     SuperficialValidation.validateElement(it)
@@ -25,7 +26,7 @@ class ProvideProcessor {
                             .first(Symbol::isConstructor)
                             .let {
                                 val methodSymbol = it as Symbol.MethodSymbol
-                                ProvideGenerator(classSymbol, methodSymbol).generate(filer)
+                                ProvideGenerator(classSymbol, methodSymbol).generate(AptContext.filer)
                             }
                 }
     }

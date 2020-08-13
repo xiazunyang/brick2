@@ -1,31 +1,43 @@
 package com.numeron.brick.processor
 
 import com.bennyhuo.aptutils.AptContext
-import com.numeron.brick.annotation.Provide
+import com.numeron.brick.annotation.*
+import com.numeron.brick.core.Brick
 import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.Filer
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
+import javax.tools.Diagnostic
 
 class BrickProcessor : AbstractProcessor() {
 
     private var processFlag = true
-    private lateinit var filer: Filer
+    private lateinit var moduleName: String
+    private lateinit var projectName: String
 
-    private val supportedAnnotations = setOf(Provide::class.java)
+    private val supportedAnnotations = setOf(
+            Inject::class.java,
+            Provide::class.java,
+            RoomInstance::class.java,
+            RetrofitInstance::class.java
+    )
 
     override fun init(processingEnv: ProcessingEnvironment) {
         AptContext.init(processingEnv)
-        filer = processingEnv.filer
         super.init(processingEnv)
+        moduleName = processingEnv.options["MODULE_NAME"] ?: ""
+        projectName = processingEnv.options["PROJECT_NAME"] ?: ""
+        if(moduleName.isEmpty() || projectName.isEmpty()) {
+            processingEnv.messager.printMessage(Diagnostic.Kind.WARNING, "No configuration annotationProcessorOptions, only supports single module project.")
+        }
+        Brick.init(projectName, moduleName)
     }
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         if (processFlag) {
-            InjectProcessor().process(roundEnv)
-            ProvideProcessor().process(roundEnv, filer)
+            InjectProcessor(projectName, moduleName).process(roundEnv)
+            ProvideProcessor().process(roundEnv)
             processFlag = !processFlag
         }
         return true

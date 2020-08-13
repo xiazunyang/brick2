@@ -45,7 +45,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         FileSpec.builder(packageName, fileName)
                 .addFunction(generateLazyFunction())    //kotlin lazy方法
-                .addFunction(generateProvideFunction()) //java provide方法
+                .addFunction(generateGetFunction()) //java provide方法
                 .addType(generateFactoryClass())        //ViewModelFactory
                 .addType(generateLazyClass())           //LazyViewModel
                 .build()
@@ -86,7 +86,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         val valueGetterFunSpec = FunSpec.getterBuilder()
                 .beginControlFlow("if(_value == null)")
-                .addStatement("_value = get(owner${parameters})")
+                .addStatement("_value = get$simpleName(owner${parameters})")
                 .endControlFlow()
                 .addStatement("return _value!!")
                 .build()
@@ -127,11 +127,12 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 .build()
     }
 
-    private fun generateProvideFunction(): FunSpec {
-        return FunSpec.builder("get")
+    private fun generateGetFunction(): FunSpec {
+        val simpleName = classSymbol.simpleName
+        return FunSpec.builder("get$simpleName")
                 .addParameter("owner", VIEW_MODEL_STORE_OWNER_TYPE_NAME)
                 .addParameters(parameters)
-                .addStatement("val factory = ${classSymbol.simpleName}Factory(${parameters.joinToString(transform = ParameterSpec::name)})")
+                .addStatement("val factory = ${simpleName}Factory(${parameters.joinToString(transform = ParameterSpec::name)})")
                 .addStatement("return %T(owner, factory).get(%T::class.java)", VIEW_MODEL_PROVIDER_TYPE_NAME, ktClassName)
                 .returns(ktClassName)
                 .build()
