@@ -1,6 +1,7 @@
 # Brick
+当前最新版本号：[![](https://jitpack.io/v/com.gitee.numeron/brick.svg)](https://jitpack.io/#com.gitee.numeron/brick)
 
-[![](https://jitpack.io/v/com.gitee.numeron/brick.svg)](https://jitpack.io/#com.gitee.numeron/brick)
+多模块示例android工程：[https://github.com/xiazunyang/Wandroid.git](https://github.com/xiazunyang/Wandroid.git)
 
 ### 介绍
 辅助android开发者搭建基于JetPack组件构建MVVM框架的注解处理框架。通过注解自动生成ViewModel的Factory类、lazy方法等；支持在项目的任意位置注入ROOM的dao层接口与Retrofit库中的api接口。
