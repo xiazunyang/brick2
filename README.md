@@ -41,55 +41,19 @@ allprojects {
     }
 }
 ```
-2.  在你的android工程的主模块中的build.gradle文件中的适当位置添加以下代码：
+2.  在要启用brick的模块中找到build.gradle文件，在所有的apply下面添加一行：
 ```
+apply plugin: 'com.android.application'
 ...
-apply plugin: 'kotlin-kapt'
-apply plugin: 'brick'
-...
-android {
-    ...
-    defaultConfig {
-        ...
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments(['MODULE_NAME': project.name, 'PROJECT_NAME': project.rootProject.name])
-            }
-        }
-    }
-    ...
-}
-...
-dependencies {
-    ...
-    implementation "com.gitee.numeron.brick:annotation:$brick_version"
-    kapt "com.gitee.numeron.brick:compiler:$brick_version"
-}
+//添加下面这行
+apply from: 'https://gitee.com/numeron/brick/raw/master/brick.gradle' 
+```
+3. 如果想加快编译速度，可以把该脚本下载下来放在与settings.gradle相同的文件夹里，然后把apply改为：
+```
+apply from: '../brick.gradle'
 ```
 
-3. 在android工程的子模块中的build.gradle文件的适当位置添加以下代码：
-```
-...
-apply plugin: 'kotlin-kapt'
-...
-android {
-    ...
-    defaultConfig {
-        ...
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments(['MODULE_NAME': project.name, 'PROJECT_NAME': project.rootProject.name])
-            }
-        }
-    }
-    ...
-}
-...
-dependencies {
-    implementation "com.gitee.numeron.brick:annotation:$brick_version"
-    kapt "com.gitee.numeron.brick:compiler:$brick_version"
-}
-```
+**注：第2步和第3步任选其一即可配置brick。**  
 ### 使用
 
 #### **一、 @Provide注解的使用方法：** 
