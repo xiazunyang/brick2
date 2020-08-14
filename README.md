@@ -18,7 +18,7 @@
 
 ### 引入
 
-1.  在你的android工程的根目录下的build.gradle文件中的适当的位置添加以下代码：
+1.  在你的`android`工程的根目录下的`build.gradle`文件中的适当的位置添加以下代码：
 ```
 buildscript {
     ...
@@ -41,14 +41,14 @@ allprojects {
     }
 }
 ```
-2.  在要启用brick的模块中找到build.gradle文件，在所有的apply下面添加一行：
+2.  在要启用`brick`的模块中找到`build.gradle`文件，在所有的`apply`下面添加一行：
 ```
 apply plugin: 'com.android.application'
 ...
 //添加下面这行
 apply from: 'https://gitee.com/numeron/brick/raw/master/brick.gradle' 
 ```
-3. 如果想加快编译速度，可以把该脚本下载下来放在与settings.gradle相同的文件夹里，然后把apply改为：
+3. 如果想加快编译速度，可以把该脚本下载下来放在与`settings.gradle`相同的文件夹里，然后把`apply`改为：
 ```
 apply from: '../brick.gradle'
 ```
@@ -64,26 +64,26 @@ class WxAuthorViewModel: ViewModel() {
     ...
 }
 ```
- 2. 有3种方式让brick注解处理器开始工作：
- * 在Terminal终端上输入`gradlew :[ModuleName]:kaptDebugKotlin`运行脚本；
- * 在AndroidStudio右侧Gradle扩展栏中依次找到`[PrjectName] -> [ModuneName] -> Tasks -> other -> kaptDebugKotlin`并双击运行脚本；
+ 2. 有3种方式让`brick`注解处理器开始工作：
+ * 在`Terminal`终端上输入`gradlew :[ModuleName]:kaptDebugKotlin`运行脚本；
+ * 在`AndroidStudio`右侧`Gradle`扩展栏中依次找到`[PrjectName] -> [ModuneName] -> Tasks -> other -> kaptDebugKotlin`并双击运行脚本；
  * `Ctrl + F9`编译整个项目。  
- **以上三种方式任选其一即可运行brick注解处理器。** 
+ **以上三种方式任选其一即可运行`brick`注解处理器。** 
  3. 脚本运行结束后，会生成两个包级方法：
- * `lazyWxAuthorViewModel()`扩展方法，在Activity或Fragment中直接调用即可。
- * `get()`方法，在不方便使用lazy方法时，可使用此方法获取ViewModel的实例。  
- **注：`lazyWxAuthorViewModel`方法就是对`get()`方法的包装。**     
-直接使用生成的方法，即可创建对应的ViewModel实例：
+ * `lazyWxAuthorViewModel()`扩展方法，在`Activity`或`Fragment`中直接调用即可。
+ * `getWxAuthorViewModel()`方法，在不方便使用`lazy`方法时，可使用此方法获取`ViewModel`的实例。  
+ **注：`lazyWxAuthorViewModel`方法就是对`getWxAuthorViewModel()`方法的包装。**     
+直接使用生成的方法，即可创建对应的`ViewModel`实例：
 ```
 private val wxAuthorViewModel by lazyWxAuthorViewModel()
 ```
- 或在onCreate()之后，通过get创建：
+ 或在`onCreate()`之后，通过`getWxAuthorViewModel`创建：
 ```
 private lateinit var wxAuthorViewModel: WxAuthorViewModel
 
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    wxAuthorViewModel = get(this)
+    wxAuthorViewModel = getWxAuthorViewModel(this)
 }
 ```
 
