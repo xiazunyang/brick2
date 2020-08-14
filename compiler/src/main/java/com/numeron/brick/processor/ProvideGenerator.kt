@@ -43,11 +43,17 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         val fileName = classSymbol.simpleName.toString() + 's'
 
+        val jvmNameAnnotation  = AnnotationSpec.builder(JvmName::class)
+                .addMember("%S", fileName)
+                .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
+                .build()
+
         FileSpec.builder(packageName, fileName)
                 .addFunction(generateLazyFunction())    //kotlin lazy方法
                 .addFunction(generateGetFunction()) //java provide方法
                 .addType(generateFactoryClass())        //ViewModelFactory
                 .addType(generateLazyClass())           //LazyViewModel
+                .addAnnotation(jvmNameAnnotation)
                 .build()
                 .writeTo(filer)
     }
