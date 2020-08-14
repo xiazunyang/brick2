@@ -1,0 +1,23 @@
+apply plugin: 'kotlin-kapt'
+if(project.plugins.hasPlugin("com.android.application")) {
+    apply plugin: 'brick'
+}
+
+ext {
+    brick_version = '0.3.1'
+}
+
+android {
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments(['MODULE_NAME': project.name, 'PROJECT_NAME': project.rootProject.name])
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "com.gitee.numeron.brick:annotation:$brick_version"
+    kapt "com.gitee.numeron.brick:compiler:$brick_version"
+}
