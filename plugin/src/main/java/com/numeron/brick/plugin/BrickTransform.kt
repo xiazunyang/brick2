@@ -17,7 +17,7 @@ class BrickTransform(project: Project) : BaseTransform(project) {
 
     private val moduleName = project.name
 
-    private val classPool = ClassPool.getDefault()
+    private val classPool = ClassPool()
 
     private val modulePathList = mutableListOf<File>()
 
@@ -40,6 +40,7 @@ class BrickTransform(project: Project) : BaseTransform(project) {
     }
 
     init {
+        classPool.appendSystemPath()
         classPool.appendClassPath(LoaderClassPath(javaClass.classLoader))
     }
 
