@@ -22,15 +22,12 @@
 ```
 buildscript {
     ...
-    ext {
-        brick_version = '0.3.2'
-    }
     repositories {
         ...
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.gitee.numeron.brick:plugin:$brick_version"
+        classpath 'com.gitee.numeron.brick:plugin:0.3.4'
     }
 }
 
