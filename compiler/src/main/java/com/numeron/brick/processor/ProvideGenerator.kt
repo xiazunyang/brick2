@@ -2,11 +2,17 @@ package com.numeron.brick.processor
 
 import com.bennyhuo.aptutils.types.asKotlinTypeName
 import com.bennyhuo.aptutils.types.packageName
+import com.bennyhuo.aptutils.types.simpleName
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.sun.tools.javac.code.Symbol
 import com.sun.tools.javac.code.Type
+import me.eugeniomarletti.kotlin.metadata.*
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 import javax.annotation.processing.Filer
+import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.type.WildcardType
 
 class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol: Symbol.MethodSymbol) {
 
@@ -17,10 +23,26 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
     private val propertiesSpec: List<PropertySpec>
 
     init {
+        //获取构造参数中的名字与具体类型
+        typeMapper.clear()
+        val metadata = classSymbol.kotlinMetadata
+        if (metadata is KotlinClassMetadata) {
+            val classData = metadata.data
+            val (nameResolver, classProto) = classData
+            classProto.constructorList
+                    .single { it.isPrimary }
+                    .valueParameterList
+                    .forEach { valueParameter ->
+                        val name = nameResolver.getString(valueParameter.name)
+                        val fqClassName = valueParameter.type.extractFullName(classData).replace("`", "")
+                        typeMapper[name] = fqClassName
+                    }
+        }
+
         methodSymbol.params()
                 .map {
-                    val name = it.name.toString()
-                    val type = asKotlinKnownTypeName(it.type)
+                    val name = it.simpleName()
+                    val type = asKotlinKnownTypeName(it)
 
                     val parameterSpec = ParameterSpec.builder(name, type).build()
 
@@ -43,14 +65,14 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
 
         val fileName = classSymbol.simpleName.toString() + 's'
 
-        val jvmNameAnnotation  = AnnotationSpec.builder(JvmName::class)
+        val jvmNameAnnotation = AnnotationSpec.builder(JvmName::class)
                 .addMember("%S", fileName)
                 .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
                 .build()
 
         FileSpec.builder(packageName, fileName)
                 .addFunction(generateLazyFunction())    //kotlin lazy方法
-                .addFunction(generateGetFunction()) //java provide方法
+                .addFunction(generateGetFunction())     //java provide方法
                 .addType(generateFactoryClass())        //ViewModelFactory
                 .addType(generateLazyClass())           //LazyViewModel
                 .addAnnotation(jvmNameAnnotation)
@@ -65,7 +87,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
         val lazyParameterizedTypeName = LAZY_INTERFACE_TYPE_NAME.parameterizedBy(ktClassName)
 
         val parameters = parameters.joinToString(transform = ParameterSpec::name).let {
-            if(it.isEmpty()) it else ", $it"
+            if (it.isEmpty()) it else ", $it"
         }
 
         return FunSpec.builder("lazy$className")
@@ -86,13 +108,11 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 .addParameters(parameters)
                 .build()
 
-        val parameters = parameters.joinToString(transform = ParameterSpec::name).let {
-            if(it.isEmpty()) it else ", $it"
-        }
+        val parameters = parameters.joinToString(transform = ParameterSpec::name)
 
         val valueGetterFunSpec = FunSpec.getterBuilder()
                 .beginControlFlow("if(_value == null)")
-                .addStatement("_value = get$simpleName(owner${parameters})")
+                .addStatement("_value = owner.get$simpleName(${parameters})")
                 .endControlFlow()
                 .addStatement("return _value!!")
                 .build()
@@ -136,10 +156,10 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
     private fun generateGetFunction(): FunSpec {
         val simpleName = classSymbol.simpleName
         return FunSpec.builder("get$simpleName")
-                .addParameter("owner", VIEW_MODEL_STORE_OWNER_TYPE_NAME)
                 .addParameters(parameters)
+                .receiver(VIEW_MODEL_STORE_OWNER_TYPE_NAME)
                 .addStatement("val factory = ${simpleName}Factory(${parameters.joinToString(transform = ParameterSpec::name)})")
-                .addStatement("return %T(owner, factory).get(%T::class.java)", VIEW_MODEL_PROVIDER_TYPE_NAME, ktClassName)
+                .addStatement("return %T(this, factory).get(%T::class.java)", VIEW_MODEL_PROVIDER_TYPE_NAME, ktClassName)
                 .returns(ktClassName)
                 .build()
     }
@@ -180,7 +200,7 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
                 .build()
     }
 
-    companion object {
+    companion object : KotlinMetadataUtils {
 
         private val CLASS_TYPE_NAME = Class::class.java.asClassName()
         private val LAZY_INTERFACE_TYPE_NAME = ClassName("kotlin", "Lazy")
@@ -189,26 +209,51 @@ class ProvideGenerator(private val classSymbol: Symbol.ClassSymbol, methodSymbol
         private val VIEW_MODEL_STORE_OWNER_TYPE_NAME = ClassName("androidx.lifecycle", "ViewModelStoreOwner")
         private val VIEW_MODEL_FACTORY_INTERFACE_TYPE_NAME = ClassName("androidx.lifecycle", "ViewModelProvider", "Factory")
 
-        private val FUNCTION_MAPPER = mapOf(
-                "kotlin.jvm.functions.Function0" to ClassName("kotlin", "Function0"),
-                "kotlin.jvm.functions.Function1" to ClassName("kotlin", "Function1"),
-                "kotlin.jvm.functions.Function2" to ClassName("kotlin", "Function2"),
-                "kotlin.jvm.functions.Function3" to ClassName("kotlin", "Function3"),
-                "kotlin.jvm.functions.Function4" to ClassName("kotlin", "Function4"),
-                "kotlin.jvm.functions.Function5" to ClassName("kotlin", "Function5"),
-                "kotlin.jvm.functions.Function6" to ClassName("kotlin", "Function6"),
-                "kotlin.jvm.functions.Function7" to ClassName("kotlin", "Function7"),
-                "kotlin.jvm.functions.Function8" to ClassName("kotlin", "Function8"),
-                "kotlin.jvm.functions.Function9" to ClassName("kotlin", "Function9")
-        )
+        private const val FUNCTION_PACKAGE = "kotlin.jvm.functions"
 
-        private fun asKotlinKnownTypeName(type: Type): TypeName {
-            return if (type is Type.ClassType && type.isParameterized) {
-                type.typeArguments.map(::asKotlinKnownTypeName).let {
-                    FUNCTION_MAPPER.getValue(type.tsym.toString()).parameterizedBy(it)
+        private val typeMapper = mutableMapOf<String, String>()
+
+        private fun asKotlinKnownTypeName(varSymbol: Symbol.VarSymbol): TypeName {
+            val varType = varSymbol.type
+            val notNull = varSymbol.getAnnotation(NotNull::class.java)
+            val nullable = varSymbol.getAnnotation(Nullable::class.java)
+            if (varType.isParameterized && varType.toString().startsWith(FUNCTION_PACKAGE)) {
+                //将泛型中的参数切割成一个String列表
+                val simpleName = varSymbol.simpleName()
+                val parameterizedNullState = typeMapper[simpleName]
+                        ?.substringAfter('<')
+                        ?.substringBeforeLast('>')
+                        ?.split(',')
+                        ?: emptyList()
+                //将类型转成KotlinTypeName，然后根据上面的参数列表判断是否可空
+                val typeArguments = varType.typeArguments.mapIndexed { index, type ->
+                    val kotlinTypeName = type.asTypeName()
+                    val isNullable = parameterizedNullState.getOrNull(index)?.endsWith('?') ?: false
+                    kotlinTypeName.copy(nullable = isNullable)
                 }
-            } else type.asKotlinTypeName()
+                val returnType = typeArguments.last()
+                val params = if (typeArguments.size < 2) emptyArray() else typeArguments.subList(0, typeArguments.size - 1).toTypedArray()
+                return LambdaTypeName.get(null, *params, returnType = returnType).copy(nullable = nullable != null && notNull == null)
+            }
+            return varType.asTypeName().copy(nullable = nullable != null && notNull == null)
         }
+
+        private fun Type.asTypeName(): TypeName {
+            val typeMirror = if (this is WildcardType) superBound ?: extendsBound else this
+            val kotlinTypeName = typeMirror.asKotlinTypeName()
+            return when (kotlinTypeName.toString()) {
+                "java.lang.Integer" -> INT
+                "java.lang.Double" -> DOUBLE
+                "java.lang.Float" -> FLOAT
+                "java.lang.Long" -> LONG
+                "java.lang.Byte" -> BYTE
+                "java.lang.Short" -> SHORT
+                else -> kotlinTypeName
+            }
+        }
+
+        override val processingEnv: ProcessingEnvironment
+            get() = BrickProcessor.processingEnv
 
     }
 

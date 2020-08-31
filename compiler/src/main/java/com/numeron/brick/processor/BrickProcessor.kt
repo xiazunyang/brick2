@@ -24,6 +24,7 @@ class BrickProcessor : AbstractProcessor() {
     )
 
     override fun init(processingEnv: ProcessingEnvironment) {
+        Companion.processingEnv = processingEnv
         AptContext.init(processingEnv)
         super.init(processingEnv)
         moduleName = processingEnv.options["MODULE_NAME"] ?: ""
@@ -47,6 +48,12 @@ class BrickProcessor : AbstractProcessor() {
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return supportedAnnotations.mapTo(HashSet(), Class<*>::getCanonicalName)
+    }
+
+    companion object {
+
+        lateinit var processingEnv: ProcessingEnvironment
+
     }
 
 }

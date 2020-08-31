@@ -10,6 +10,7 @@ version = brick_version
 dependencies {
     api project(':core')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'me.eugeniomarletti.kotlin.metadata:kotlin-metadata:1.4.0'
     implementation 'com.squareup:kotlinpoet:1.6.0'
     implementation 'com.google.auto:auto-common:0.10'
     implementation 'com.bennyhuo.aptutils:aptutils:1.6'
